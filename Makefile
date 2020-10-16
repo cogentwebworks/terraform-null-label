@@ -1,10 +1,27 @@
-SHELL := /bin/bash
+.ONESHELL:
+.SHELL := /usr/bin/bash
+.PHONY : lint apply  destroy apply dry init
 
-# List of targets the `readme` target should call before generating the readme
-export README_DEPS ?= docs/targets.md docs/terraform.md
+.PHONY : init
+init:
+	terraform init --var-file=$(tfvar).tfvars
 
--include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
+.PHONY : dry
+dry:
+	terraform plan --var-file=$(tfvar).tfvars
 
-## Lint terraform code
+.PHONY : apply
+apply:
+	terraform apply -auto-approve --var-file=$(tfvar).tfvars
+
+.PHONY : destroy
+destroy:
+	terraform destroy -auto-approve --var-file=$(tfvar).tfvars  && rm -rf .terraform  && rm -rf  terraform.tfstate
+
+.PHONY : lint
 lint:
-	$(SELF) terraform/install terraform/get-modules terraform/get-plugins terraform/lint terraform/validate
+	terraform validate && terraform fmt
+
+help: ## Display this information. Default target.
+	@echo "Valid targets:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
