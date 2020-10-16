@@ -2,19 +2,9 @@
 # terraform-null-label example #
 ################################
 module "label" {
-  source    = "../../"
-  namespace = "eg"
-  stage     = "prod"
-  name      = "app"
+  source = "../../"
 
-  tags = {
-    BusinessUnit = "Finance"
-    ManagedBy    = "Terraform"
-  }
-
-  additional_tag_map = {
-    propagate_at_launch = "true"
-  }
+  context = module.this.context
 }
 
 #######################
@@ -64,7 +54,7 @@ resource "aws_autoscaling_group" "default" {
 # Provider                     #
 ################################
 provider "aws" {
-  region  = "eu-west-1"
+  region = "eu-west-1"
 
   # Make it faster by skipping unneeded checks here
   skip_get_ec2_platforms      = true
